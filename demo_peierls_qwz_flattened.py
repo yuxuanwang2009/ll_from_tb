@@ -100,7 +100,7 @@ def main() -> None:
 
     # For m=1.5, the conduction band minimum is at (π,π) with E_min ≈ |m-2| = 0.5.
     # Choose μ slightly above this so the FS is a single small closed pocket.
-    mu = 0
+    mu = 0.00
 
     # Weak-field regime: scan small flux φ=p/q at fixed q (so the Hilbert space size is fixed),
     # which makes it meaningful to track the same levels as B varies.

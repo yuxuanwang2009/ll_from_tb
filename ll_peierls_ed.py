@@ -253,8 +253,10 @@ def ll_spacing_near_mu_from_levels_window(
     `plot_levels_window_vs_B_ed`.
 
     For each B, sort the energies and compute the gaps ΔE_j = E_{j+1}-E_j.
-    The "near-μ" gap is chosen by the midpoint criterion: select the gaps whose
-    midpoints are closest to μ and average the closest `navg` of them.
+    The "near-μ" gap is chosen by proximity to μ in *energy-interval* distance:
+      - gaps that straddle μ (Ei[j] <= μ <= Ei[j+1]) are preferred (distance=0),
+      - otherwise use the distance from μ to the nearer endpoint of the gap.
+    Average the closest `navg` gaps by this criterion.
     """
     B = np.asarray(B, dtype=float)
     E = np.asarray(E, dtype=float)
@@ -300,8 +302,16 @@ def ll_spacing_near_mu_from_levels_window(
             continue
 
         gaps = np.diff(Ei)
-        mids = 0.5 * (Ei[:-1] + Ei[1:])
-        pick = np.argsort(np.abs(mids - float(mu)))[: min(navg, gaps.size)]
+        left = Ei[:-1]
+        right = Ei[1:]
+        mu_f = float(mu)
+        contains = (left <= mu_f) & (mu_f <= right)
+        dist = np.where(
+            contains,
+            0.0,
+            np.minimum(np.abs(mu_f - left), np.abs(mu_f - right)),
+        )
+        pick = np.argsort(dist)[: min(navg, gaps.size)]
         dEout.append(float(np.mean(gaps[pick])))
 
     return {
